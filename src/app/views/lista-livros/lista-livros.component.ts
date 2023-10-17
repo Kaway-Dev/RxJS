@@ -1,32 +1,48 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { Livro } from 'src/app/models/interfaces';
 import { LivroService } from 'src/app/service/livro.service';
 
 @Component({
   selector: 'app-lista-livros',
   templateUrl: './lista-livros.component.html',
-  styleUrls: ['./lista-livros.component.css']
+  styleUrls: ['./lista-livros.component.css'],
 })
 export class ListaLivrosComponent implements OnDestroy {
+  listaLivros: Livro[];
+  CampoBusca: string = '';
+  subscription: Subscription;
+  livro: Livro;
 
-  listaLivros: [];
-  CampoBusca: string = ''
-  subscription: Subscription
-
-  constructor(private service: LivroService) { }
+  constructor(private service: LivroService) {}
 
   buscarLivros() {
     this.subscription = this.service.buscar(this.CampoBusca).subscribe({
-      next: retornoAPI => console.log(retornoAPI),
-      error: erro => console.error(erro),
-      complete: () => console.log('Observable completado')
+      next: (itens) => {
+        this.listaLivros = this.livrosResultadosParaLivros(itens);
+      },
+      error: (erro) => console.error(erro),
     });
   }
 
+  livrosResultadosParaLivros(itens): Livro[] {
+    const livros: Livro[] = [];
+
+    itens.forEach(item => {
+      livros.push(
+        this.livro = {
+          title: item.volumeInfo?.title,
+          authors: item.volumeInfo?.authors,
+          publisher: item.volumeInfo?.publisher,
+          publishedDate: item.volumeInfo?.publishedDate,
+          description: item.volumeInfo?.description,
+          previewLink: item.volumeInfo?.previewLink,
+          thumbnail: item.volumeInfo?.imageLinks?.thumbnail,
+        });
+    });
+    return livros;
+  }
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 }
-
-
-
