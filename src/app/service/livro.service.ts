@@ -10,18 +10,10 @@ export class LivroService {
   private readonly API = 'https://www.googleapis.com/books/v1/volumes';
   constructor(private http: HttpClient) { }
 
-  buscar(valorDigitado: string): Observable<Item[]> {
-    if (valorDigitado) {
-      const params = new HttpParams().append('q', valorDigitado);
-      return this.http.get<LivrosResultado>(this.API, { params }).pipe(
-        map(retorno => { return retorno.items; }),
-        catchError(error => {
-          console.error('Erro na busca:', error);
-          return of([]);
-        })
-      );
-    } else {
-      return of([]);
-    }
+  buscar(valorDigitado: string): Observable<LivrosResultado> {
+    const params = new HttpParams().append('q', valorDigitado);
+    return this.http.get<LivrosResultado>(this.API, { params })
+    // .pipe(
+    // )
   }
 }
