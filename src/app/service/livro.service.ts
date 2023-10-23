@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, map, tap } from 'rxjs';
+import { Observable, catchError, map, of } from 'rxjs';
 import { Item, LivrosResultado } from '../models/interfaces';
 
 @Injectable({
@@ -8,14 +8,20 @@ import { Item, LivrosResultado } from '../models/interfaces';
 })
 export class LivroService {
   private readonly API = 'https://www.googleapis.com/books/v1/volumes';
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   buscar(valorDigitado: string): Observable<Item[]> {
-    const params = new HttpParams().append('q', valorDigitado);
-    return this.http.get<LivrosResultado>(this.API, { params }).pipe(
-      tap(retornoAPI => console.log('Fluxo do tap', retornoAPI)),
-      map(resultado => resultado.items),
-      tap(resultado => console.log('Fluxo após o map', resultado))
-    );
+    if (valorDigitado) {
+      const params = new HttpParams().append('q', valorDigitado);
+      return this.http.get<LivrosResultado>(this.API, { params }).pipe(
+        map(retorno => { return retorno.items; }),
+        catchError(error => {
+          console.error('Erro na busca:', error);
+          return of([]);
+        })
+      );
+    } else {
+      return of([]);
+    }
   }
 }
